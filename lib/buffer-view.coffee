@@ -1,8 +1,8 @@
 _ = require 'underscore-plus'
-FuzzyFinderView = require './fuzzy-finder-view'
+XobFuzzyFinderView = require './xob-fuzzy-finder-view'
 
 module.exports =
-class BufferView extends FuzzyFinderView
+class BufferView extends XobFuzzyFinderView
   toggle: ->
     if @panel?.isVisible()
       @cancel()

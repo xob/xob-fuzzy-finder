@@ -7,7 +7,7 @@ fuzzaldrin = require 'fuzzaldrin'
 fuzzaldrinPlus = require 'fuzzaldrin-plus'
 
 module.exports =
-class FuzzyFinderView extends SelectListView
+class XobFuzzyFinderView extends SelectListView
   filePaths: null
   projectRelativePaths: null
   subscriptions: null
@@ -16,7 +16,7 @@ class FuzzyFinderView extends SelectListView
   initialize: ->
     super
 
-    @addClass('fuzzy-finder')
+    @addClass('xob-fuzzy-finder')
     @setMaxItems(10)
     @subscriptions = new CompositeDisposable
 
@@ -38,18 +38,44 @@ class FuzzyFinderView extends SelectListView
       'pane:split-down': splitDown
       'pane:split-down-and-copy-active-item': splitDown
       'pane:split-down-and-move-active-item': splitDown
-      'fuzzy-finder:invert-confirm': =>
+      'xob-fuzzy-finder:invert-confirm': =>
         @confirmInvertedSelection()
+      'xob-fuzzy-finder:confirm-and-advance': =>
+        @confirmSelectionAndRemain()
+        @selectNextItemView()
+      'xob-fuzzy-finder:right-key-handler': =>
+        if @isCursorAtEOL()
+          @confirmSelectionAndRemain()
+        else
+          @moveCursorToTheRight()
 
-    @alternateScoring = atom.config.get 'fuzzy-finder.useAlternateScoring'
-    @subscriptions.add atom.config.onDidChange 'fuzzy-finder.useAlternateScoring', ({newValue}) => @alternateScoring = newValue
+    @alternateScoring = atom.config.get 'xob-fuzzy-finder.useAlternateScoring'
+    @subscriptions.add atom.config.onDidChange 'xob-fuzzy-finder.useAlternateScoring', ({newValue}) => @alternateScoring = newValue
 
+    # would be better to refactor
+    # https://github.com/atom/atom-space-pen-views/blob/master/src/select-list-view.coffee
+    # to provide a @filterEditorViewBlurred() method to override rather than doing this
+    @filterEditorView.off 'blur'
+    @filterEditorView.on 'blur', @filterEditorViewBlurred
+
+  isCursorAtEOL: ->
+    cursorPos = @filterEditorView.getModel().getCursorBufferPosition().column
+    bufferLength = @filterEditorView.getModel().getBuffer().getEndPosition().column
+    cursorPos is bufferLength
+
+  moveCursorToTheRight: ->
+    cursorPos = @filterEditorView.getModel().getCursorBufferPosition()
+    cursorPos.column++
+    @filterEditorView.getModel().setCursorBufferPosition(cursorPos)
+
+  filterEditorViewBlurred: (e) =>
+    @cancel() unless @cancelling or @remainAfterOpening
 
   getFilterKey: ->
     'projectRelativePath'
 
   cancel: ->
-    if atom.config.get('fuzzy-finder.preserveLastSearch')
+    if atom.config.get('xob-fuzzy-finder.preserveLastSearch')
       lastSearch = @getFilterQuery()
       super
 
@@ -98,7 +124,7 @@ class FuzzyFinderView extends SelectListView
 
       @li class: 'two-lines', =>
         if (repo = repositoryForPath(filePath))?
-          id = encodeURIComponent("fuzzy-finder-#{filePath}")
+          id = encodeURIComponent("xob-fuzzy-finder-#{filePath}")
           @div class: 'status', id: id
           repo.getCachedPathStatus(filePath).then (status) ->
             statusNode = $(document.getElementById(id))
@@ -129,7 +155,12 @@ class FuzzyFinderView extends SelectListView
 
   openPath: (filePath, lineNumber, openOptions) ->
     if filePath
-      atom.workspace.open(filePath, openOptions).then => @moveToLine(lineNumber)
+      @remainAfterOpening = openOptions and openOptions.remainAfter
+      atom.workspace.open(filePath, openOptions).then =>
+        @moveToLine(lineNumber)
+        if @remainAfterOpening
+          @focusFilterEditor()
+          @remainAfterOpening = false
 
   moveToLine: (lineNumber=-1) ->
     return unless lineNumber >= 0
@@ -202,11 +233,15 @@ class FuzzyFinderView extends SelectListView
 
   confirmSelection: ->
     item = @getSelectedItem()
-    @confirmed(item, searchAllPanes: atom.config.get('fuzzy-finder.searchAllPanes'))
+    @confirmed(item, searchAllPanes: atom.config.get('xob-fuzzy-finder.searchAllPanes'))
 
   confirmInvertedSelection: ->
     item = @getSelectedItem()
-    @confirmed(item, searchAllPanes: not atom.config.get('fuzzy-finder.searchAllPanes'))
+    @confirmed(item, searchAllPanes: not atom.config.get('xob-fuzzy-finder.searchAllPanes'))
+
+  confirmSelectionAndRemain: ->
+    item = @getSelectedItem()
+    @confirmed(item, remainAfter: true)
 
   confirmed: ({filePath}={}, openOptions) ->
     if atom.workspace.getActiveTextEditor() and @isQueryALineJump()
@@ -220,7 +255,7 @@ class FuzzyFinderView extends SelectListView
       setTimeout((=> @setError()), 2000)
     else
       lineNumber = @getLineNumber()
-      @cancel()
+      @cancel() unless openOptions and openOptions.remainAfter
       @openPath(filePath, lineNumber, openOptions)
 
   isQueryALineJump: ->

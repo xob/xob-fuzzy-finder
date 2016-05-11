@@ -8,9 +8,9 @@ wrench = require 'wrench'
 
 PathLoader = require '../lib/path-loader'
 
-describe 'FuzzyFinder', ->
+describe 'XobFuzzyFinder', ->
   [rootDir1, rootDir2] = []
-  [fuzzyFinder, projectView, bufferView, gitStatusView, workspaceElement, fixturesPath] = []
+  [XobFuzzyFinder, projectView, bufferView, gitStatusView, workspaceElement, fixturesPath] = []
 
   beforeEach ->
     rootDir1 = fs.realpathSync(temp.mkdirSync('root-dir1'))
@@ -38,18 +38,18 @@ describe 'FuzzyFinder', ->
       atom.workspace.open(path.join(rootDir1, 'sample.js'))
 
     waitsForPromise ->
-      atom.packages.activatePackage('fuzzy-finder').then (pack) ->
-        fuzzyFinder = pack.mainModule
-        projectView = fuzzyFinder.createProjectView()
-        bufferView = fuzzyFinder.createBufferView()
-        gitStatusView = fuzzyFinder.createGitStatusView()
+      atom.packages.activatePackage('xob-fuzzy-finder').then (pack) ->
+        XobFuzzyFinder = pack.mainModule
+        projectView = XobFuzzyFinder.createProjectView()
+        bufferView = XobFuzzyFinder.createBufferView()
+        gitStatusView = XobFuzzyFinder.createGitStatusView()
 
   dispatchCommand = (command) ->
-    atom.commands.dispatch(workspaceElement, "fuzzy-finder:#{command}")
+    atom.commands.dispatch(workspaceElement, "xob-fuzzy-finder:#{command}")
 
-  waitForPathsToDisplay = (fuzzyFinderView) ->
+  waitForPathsToDisplay = (XobFuzzyFinderView) ->
     waitsFor "paths to display", 5000, ->
-      fuzzyFinderView.list.children("li").length > 0
+      XobFuzzyFinderView.list.children("li").length > 0
 
   waitsForPaths = (finder, expectedPaths) ->
     waitsFor "specific paths", 3000, ->
@@ -71,7 +71,7 @@ describe 'FuzzyFinder', ->
 
     describe "toggling", ->
       describe "when the project has multiple paths", ->
-        it "shows or hides the fuzzy-finder and returns focus to the active editor if it is already showing", ->
+        it "shows or hides the xob-fuzzy-finder and returns focus to the active editor if it is already showing", ->
           jasmine.attachToDOM(workspaceElement)
 
           expect(atom.workspace.panelForItem(projectView)).toBeNull()
@@ -238,8 +238,8 @@ describe 'FuzzyFinder', ->
             waitForPathsToDisplay(projectView)
             expect(projectView.list.find("li:contains(some.sock)")).not.toExist()
 
-        it "ignores paths that match entries in config.fuzzy-finder.ignoredNames", ->
-          atom.config.set("fuzzy-finder.ignoredNames", ["sample.js", "*.txt"])
+        it "ignores paths that match entries in config.xob-fuzzy-finder.ignoredNames", ->
+          atom.config.set("xob-fuzzy-finder.ignoredNames", ["sample.js", "*.txt"])
 
           dispatchCommand('toggle-file-finder')
 
@@ -334,7 +334,7 @@ describe 'FuzzyFinder', ->
           waitsForPromise ->
             atom.workspace.open('sample.txt')
 
-        it "shows the FuzzyFinder if it isn't showing, or hides it and returns focus to the active editor", ->
+        it "shows the XobFuzzyFinder if it isn't showing, or hides it and returns focus to the active editor", ->
           expect(atom.workspace.panelForItem(bufferView)).toBeNull()
           atom.workspace.getActivePane().splitRight(copyActiveItem: true)
           [editor1, editor2, editor3] = atom.workspace.getTextEditors()
@@ -344,7 +344,7 @@ describe 'FuzzyFinder', ->
 
           dispatchCommand('toggle-buffer-finder')
           expect(atom.workspace.panelForItem(bufferView).isVisible()).toBe true
-          expect(workspaceElement.querySelector('.fuzzy-finder')).toHaveFocus()
+          expect(workspaceElement.querySelector('.xob-fuzzy-finder')).toHaveFocus()
           bufferView.filterEditorView.getModel().insertText('this should not show up next time we toggle')
 
           dispatchCommand('toggle-buffer-finder')
@@ -397,8 +397,8 @@ describe 'FuzzyFinder', ->
             atom.workspace.open()
 
           runs ->
-            atom.packages.deactivatePackage('fuzzy-finder')
-            states = _.map atom.packages.getPackageState('fuzzy-finder'), (path, time) -> [ path, time ]
+            atom.packages.deactivatePackage('xob-fuzzy-finder')
+            states = _.map atom.packages.getPackageState('xob-fuzzy-finder'), (path, time) -> [ path, time ]
             expect(states.length).toBe 3
             states = _.sortBy states, (path, time) -> -time
 
@@ -468,7 +468,7 @@ describe 'FuzzyFinder', ->
             expect(editor3.getPath()).toBe expectedPath
             expect(atom.views.getView(editor3)).toHaveFocus()
 
-      describe "when the active pane does not have an item for the selected path and fuzzy-finder.searchAllPanes is false", ->
+      describe "when the active pane does not have an item for the selected path and xob-fuzzy-finder.searchAllPanes is false", ->
         it "adds a new item to the active pane for the selected path", ->
           dispatchCommand('toggle-buffer-finder')
 
@@ -479,7 +479,7 @@ describe 'FuzzyFinder', ->
           expect(atom.workspace.getActiveTextEditor()).toBe editor1
 
           expectedPath = atom.project.getDirectories()[0].resolve('sample.txt')
-          bufferView.confirmed({filePath: expectedPath}, atom.config.get 'fuzzy-finder.searchAllPanes')
+          bufferView.confirmed({filePath: expectedPath}, atom.config.get 'xob-fuzzy-finder.searchAllPanes')
 
           waitsFor ->
             atom.workspace.getActivePane().getItems().length is 2
@@ -496,9 +496,9 @@ describe 'FuzzyFinder', ->
             expect(editor4.getPath()).toBe expectedPath
             expect(atom.views.getView(editor4)).toHaveFocus()
 
-      describe "when the active pane does not have an item for the selected path and fuzzy-finder.searchAllPanes is true", ->
+      describe "when the active pane does not have an item for the selected path and xob-fuzzy-finder.searchAllPanes is true", ->
         beforeEach ->
-          atom.config.set("fuzzy-finder.searchAllPanes", true)
+          atom.config.set("xob-fuzzy-finder.searchAllPanes", true)
 
         it "switches to the pane with the item for the selected path", ->
           dispatchCommand('toggle-buffer-finder')
@@ -512,7 +512,7 @@ describe 'FuzzyFinder', ->
           originalPane = atom.workspace.getActivePane()
 
           expectedPath = atom.project.getDirectories()[0].resolve('sample.txt')
-          bufferView.confirmed({filePath: expectedPath}, searchAllPanes: atom.config.get('fuzzy-finder.searchAllPanes'))
+          bufferView.confirmed({filePath: expectedPath}, searchAllPanes: atom.config.get('xob-fuzzy-finder.searchAllPanes'))
 
           waitsFor ->
             atom.workspace.getActiveTextEditor().getPath() is expectedPath
@@ -623,27 +623,27 @@ describe 'FuzzyFinder', ->
 
     describe "the initial load paths task started during package activation", ->
       beforeEach ->
-        fuzzyFinder.projectView.destroy()
-        fuzzyFinder.projectView = null
-        fuzzyFinder.startLoadPathsTask()
+        XobFuzzyFinder.projectView.destroy()
+        XobFuzzyFinder.projectView = null
+        XobFuzzyFinder.startLoadPathsTask()
 
         waitsFor ->
-          fuzzyFinder.projectPaths
+          XobFuzzyFinder.projectPaths
 
       it "passes the indexed paths into the project view when it is created", ->
-        {projectPaths} = fuzzyFinder
+        {projectPaths} = XobFuzzyFinder
         expect(projectPaths.length).toBe 18
-        projectView = fuzzyFinder.createProjectView()
+        projectView = XobFuzzyFinder.createProjectView()
         expect(projectView.paths).toBe projectPaths
         expect(projectView.reloadPaths).toBe false
 
       it "busts the cached paths when the project paths change", ->
         atom.project.setPaths([])
 
-        {projectPaths} = fuzzyFinder
+        {projectPaths} = XobFuzzyFinder
         expect(projectPaths).toBe null
 
-        projectView = fuzzyFinder.createProjectView()
+        projectView = XobFuzzyFinder.createProjectView()
         expect(projectView.paths).toBe null
         expect(projectView.reloadPaths).toBe true
 
@@ -921,7 +921,7 @@ describe 'FuzzyFinder', ->
       expect(projectView.filterEditorView.getText()).toBe ''
 
     it "preserves last search when the config is set", ->
-      atom.config.set("fuzzy-finder.preserveLastSearch", true)
+      atom.config.set("xob-fuzzy-finder.preserveLastSearch", true)
 
       dispatchCommand('toggle-file-finder')
       expect(atom.workspace.panelForItem(projectView).isVisible()).toBe true
