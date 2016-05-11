@@ -1,0 +1,8 @@
+'menu': [
+  'label': 'Find'
+  'submenu': [
+    { 'label': 'Find Buffer', 'command': 'xob-fuzzy-finder:toggle-buffer-finder' }
+    { 'label': 'Find File', 'command': 'xob-fuzzy-finder:toggle-file-finder' }
+    { 'label': 'Find Modified File', 'command': 'xob-fuzzy-finder:toggle-git-status-finder' }
+  ]
+]

@@ -1,0 +1,22 @@
+'.platform-darwin':
+  'cmd-t': 'xob-fuzzy-finder:toggle-file-finder'
+  'cmd-p': 'xob-fuzzy-finder:toggle-file-finder'
+  'cmd-b': 'xob-fuzzy-finder:toggle-buffer-finder'
+  'cmd-B': 'xob-fuzzy-finder:toggle-git-status-finder'
+
+'.platform-win32':
+  'ctrl-t': 'xob-fuzzy-finder:toggle-file-finder'
+  'ctrl-p': 'xob-fuzzy-finder:toggle-file-finder'
+  'ctrl-b': 'xob-fuzzy-finder:toggle-buffer-finder'
+  'ctrl-B': 'xob-fuzzy-finder:toggle-git-status-finder'
+
+'.platform-linux':
+  'ctrl-t': 'xob-fuzzy-finder:toggle-file-finder'
+  'ctrl-p': 'xob-fuzzy-finder:toggle-file-finder'
+  'ctrl-b': 'xob-fuzzy-finder:toggle-buffer-finder'
+  'ctrl-B': 'xob-fuzzy-finder:toggle-git-status-finder'
+
+'.xob-fuzzy-finder atom-text-editor[mini]':
+  'shift-enter': 'xob-fuzzy-finder:invert-confirm'
+  'ctrl-enter': 'xob-fuzzy-finder:confirm-and-advance'
+  'right': 'xob-fuzzy-finder:right-key-handler'

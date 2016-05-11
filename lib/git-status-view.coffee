@@ -1,9 +1,9 @@
 path = require 'path'
 fs = require 'fs-plus'
-FuzzyFinderView = require './fuzzy-finder-view'
+XobFuzzyFinderView = require './xob-fuzzy-finder-view'
 
 module.exports =
-class GitStatusView extends FuzzyFinderView
+class GitStatusView extends XobFuzzyFinderView
   toggle: ->
     if @panel?.isVisible()
       @cancel()

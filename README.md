@@ -7,10 +7,12 @@ Quickly find and open files using `cmd-t`.
   * `cmd-shift-b` to open the list of Git modified and untracked files
   * `enter` defaults to opening the selected file without leaving the current pane
   * `shift-enter` defaults to switching to another pane if the file is already open there
+  * `ctrl-enter` defaults to opening the selected file without leaving the search pane, and selecting the next search result
+  * `right` defaults to opening the selected file without leaving the search pane if the cursor is at the end of the line (similar to Sublime Text 3)
 
 Turning on the "Search All Panes" setting reverses the behavior of `enter` and `shift-enter` so `enter` opens the file in any pane and `shift-enter` creates a new tab in the current pane.
 
-This package uses both the `core.ignoredNames` and `fuzzy-finder.ignoredNames`
+This package uses both the `core.ignoredNames` and `xob-fuzzy-finder.ignoredNames`
 config settings to filter out files and folders that will not be shown.
 Both of those config settings are interpreted as arrays of
 [minimatch](https://github.com/isaacs/minimatch) glob patterns.
