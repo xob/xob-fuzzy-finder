@@ -1,6 +1,6 @@
 {
   "name": "xob-fuzzy-finder",
-  "version": "1.0.6",
+  "version": "1.4.1",
   "main": "./lib/main",
   "description": "Open an editor to a file in the project with `cmd-t`.",
   "repository": "https://github.com/xob/xob-fuzzy-finder",
@@ -10,9 +10,9 @@
     "atom-space-pen-views": "^2.0.0",
     "fs-plus": "^2.0.0",
     "fuzzaldrin": "^2.0",
-    "fuzzaldrin-plus": "^0.1",
-    "humanize-plus": "~1.4.2",
-    "minimatch": "~0.3.0",
+    "fuzzaldrin-plus": "^0.4.1",
+    "humanize-plus": "~1.8.2",
+    "minimatch": "~3.0.3",
     "temp": "~0.8.1",
     "underscore-plus": "^1.0.0",
     "wrench": "^1.5"
@@ -22,6 +22,13 @@
   },
   "devDependencies": {
     "coffeelint": "^1.9.7"
+  },
+  "consumedServices": {
+    "atom.file-icons": {
+      "versions": {
+        "1.0.0": "consumeFileIcons"
+      }
+    }
   },
   "configSchema": {
     "ignoredNames": {

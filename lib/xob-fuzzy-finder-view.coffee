@@ -5,6 +5,7 @@ path = require 'path'
 fs = require 'fs-plus'
 fuzzaldrin = require 'fuzzaldrin'
 fuzzaldrinPlus = require 'fuzzaldrin-plus'
+FileIcons = require './file-icons'
 
 module.exports =
 class XobFuzzyFinderView extends SelectListView
@@ -124,33 +125,20 @@ class XobFuzzyFinderView extends SelectListView
 
       @li class: 'two-lines', =>
         if (repo = repositoryForPath(filePath))?
-          id = encodeURIComponent("xob-fuzzy-finder-#{filePath}")
-          @div class: 'status', id: id
-          repo.getCachedPathStatus(filePath).then (status) ->
-            statusNode = $(document.getElementById(id))
-            if statusNode? and repo.isStatusNew(status)
-              statusNode.addClass('status-added icon icon-diff-added')
-            else if statusNode? and repo.isStatusModified(status)
-              statusNode.addClass('status-modified icon icon-diff-modified')
+          status = repo.getCachedPathStatus(filePath)
+          if repo.isStatusNew(status)
+            @div class: 'status status-added icon icon-diff-added'
+          else if repo.isStatusModified(status)
+            @div class: 'status status-modified icon icon-diff-modified'
 
-        ext = path.extname(filePath)
-        if fs.isReadmePath(filePath)
-          typeClass = 'icon-book'
-        else if fs.isCompressedExtension(ext)
-          typeClass = 'icon-file-zip'
-        else if fs.isImageExtension(ext)
-          typeClass = 'icon-file-media'
-        else if fs.isPdfExtension(ext)
-          typeClass = 'icon-file-pdf'
-        else if fs.isBinaryExtension(ext)
-          typeClass = 'icon-file-binary'
-        else
-          typeClass = 'icon-file-text'
+        typeClass = FileIcons.getService().iconClassForPath(filePath, 'xob-fuzzy-finder') or []
+        unless Array.isArray typeClass
+          typeClass = typeClass?.toString().split(/\s+/g)
 
         fileBasename = path.basename(filePath)
         baseOffset = projectRelativePath.length - fileBasename.length
 
-        @div class: "primary-line file icon #{typeClass}", 'data-name': fileBasename, 'data-path': projectRelativePath, -> highlighter(fileBasename, matches, baseOffset)
+        @div class: "primary-line file icon #{typeClass.join(' ')}", 'data-name': fileBasename, 'data-path': projectRelativePath, -> highlighter(fileBasename, matches, baseOffset)
         @div class: 'secondary-line path no-icon', -> highlighter(projectRelativePath, matches, 0)
 
   openPath: (filePath, lineNumber, openOptions) ->

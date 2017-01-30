@@ -1,3 +1,6 @@
+{Disposable} = require 'atom'
+FileIcons = require './file-icons'
+
 module.exports =
   activate: (state) ->
     @active = true
@@ -31,6 +34,11 @@ module.exports =
     @projectPaths = null
     @stopLoadPathsTask()
     @active = false
+
+  consumeFileIcons: (service) ->
+    FileIcons.setService(service)
+    new Disposable ->
+      FileIcons.resetService()
 
   serialize: ->
     paths = {}
